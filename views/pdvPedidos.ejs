@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PDV</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('partials/sidebar') %>
+
+  <div style="padding: 20px; margin-left: 210px;">
+    <h2 class="title-page">Novo Pedido</h2>
+    <div id="modo-pedido" style="display: flex; gap:20px;">
+      <form id="form-pedido" class="form-vendas">
+        <div>
+          <div style="display: flex;">
+            <div>
+              <label>Nome Cliente*:</label>
+              <input type="text" name="nome" required>
+            </div>
+            <div>
+              <label>Telefone*:</label>
+              <input type="text" name="telefone" required>
+            </div>
+          </div>
+          <div style="display: flex;">
+            <div>
+              <label>Email:</label>
+              <input type="email" name="email">
+            </div>
+            <div>
+              <label>Data de Entrega:</label>
+              <input type="date" name="dataEntrega" id="data-entrega">
+            </div>
+          </div>
+          <div style="display: flex;">
+            <div>
+              <label>Local de Entrega:</label>
+              <input type="text" name="localEntrega" placeholder="Endereço ou local de entrega">
+            </div>
+            <div>
+              <label>Forma de Pagamento</label>
+              <select name="formaPagamento" id="pedido-forma-pagamento">
+                <option>Pendente Pagamento</option>
+                <option>Cartão</option>
+                <option>Dinheiro</option>
+                <option>Pix</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Campos Financeiros do Pedido -->
+          <div style="border: 1px solid #ffcc29; padding: 15px; margin: 15px 0; border-radius: 8px; background: #313131;">
+            <h4 style="margin: 0 0 15px 0; color: #ffcc29;">Informações Financeiras</h4>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+              <div>
+                <label>Valor Pago:</label>
+                <input type="number" name="valorPago" id="pedido-valor-pago" step="0.01" min="0" placeholder="0.00">
+              </div>
+              <div>
+                <label>Desconto:</label>
+                <input type="number" name="desconto" id="pedido-desconto" step="0.01" min="0" placeholder="0.00">
+              </div>              
+            </div>
+          </div>
+          
+          <!-- Campos do Item -->
+          <div style="border: 1px solid #ffcc29; padding: 15px; margin: 15px 0; border-radius: 8px; background: #313131;">
+            <h4 style="margin: 0 0 15px 0; color: #ffcc29;">Item do Pedido</h4>
+            <div style="display: flex; gap: 15px; ">
+              <div>
+                <label>Vestuário:</label>
+                <input type="text" id="pedido-vestuario" placeholder="Ex: Camiseta, Calça, etc.">
+              </div>
+              <div>
+                <label>Malha:</label>
+                <input type="text" id="pedido-malha" placeholder="Tipo de malha">
+              </div>
+            </div>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+              <div>
+                <label>Cor:</label>
+                <input type="text" id="pedido-cor" placeholder="Cor do produto">
+              </div>
+              <div>
+                <label>Tamanho:</label>
+                <input type="text" id="pedido-tamanho" placeholder="P, M, G, etc.">
+              </div>
+            </div>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
+              <div>
+                <label>Quantidade:</label>
+                <input type="number" id="pedido-quantidade" value="1" min="1" style="width: 90px;text-align: center;">
+              </div>
+              <div>
+                <label>Estampa:</label>
+                <input type="text" id="pedido-estampa" placeholder="Tipo de estampa">
+              </div>
+            </div>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
+              <div>
+                <label>Custo Unitário:</label>
+                <input type="number" id="pedido-custo-unid" step="0.01" min="0" placeholder="0.00">
+              </div>
+              <div>
+                <label>Valor Unitário:</label>
+                <input type="number" id="pedido-valor-unid" step="0.01" min="0" placeholder="0.00">
+              </div>
+            </div>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
+              <div>
+                <label>Observação do Item:</label>
+                <input type="text" id="pedido-observacao" placeholder="Observação específica do item">
+              </div>
+            </div>
+          </div>
+           
+           <!-- Observação Geral do Pedido -->
+           <div style="margin-top: 15px;">
+             <label style="display: block; margin-bottom: 5px; font-weight: bold;">Observação Geral do Pedido:</label>
+             <textarea 
+               id="pedido-observacao-geral" 
+               name="observacaoGeral"
+               placeholder="Observações gerais sobre o pedido, instruções especiais, etc."
+               style="width: 100%; min-height: 80px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical; font-family: inherit;"
+             ></textarea>
+           </div>
+           
+           <div style="display: flex; gap: 20px; margin-top: 20px;">
+             <button type="button" id="btn-adicionar">Adicionar</button>
+             <button type="button" id="btn-concluir">Concluir Pedido</button>
+             <button type="reset">Cancelar</button>
+           </div>
+        </div>
+      </form>
+             <div style="display: flex; flex-direction: column;">
+                   <div style="display: flex; gap: 10px;">
+            <div class="card-value"><strong>Total do Item</strong><span id="pedido-total">0.00</span></div>
+            <div class="card-value"><strong>Desconto</strong><span id="pedido-total-desconto">0.00</span></div>
+            <div class="card-value"><strong>Valor Restante</strong><span id="totalApagar">0.00</span></div>
+          </div>
+         
+                   <!-- Total Geral dos Itens Adicionados -->
+          <div style="margin-top: 20px;">
+            <h4 style="margin: 0 0 10px 0; color: #fff;">Pedido</h4>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+              <div class="card-value" style="background: #000; color: #333; padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+                <strong>Total</strong>
+                <span id="total-geral-bruto" style="font-size: 18px;">R$ 0,00</span>
+              </div>
+              <div class="card-value" style="background: #000; color: #333; padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+                <strong>Desconto Total</strong>
+                <span id="total-geral-com-desconto" style="font-size: 18px;">R$ 0,00</span>
+              </div>
+              <div class="card-value" style="background: #000; color: #333; padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+                <strong>Total Pago</strong>
+                <span id="total-geral-pago" style="font-size: 18px;">R$ 0,00</span>
+              </div>
+              <div class="card-value" style="background: #000; color: #333; padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+                <strong>Total Restante</strong>
+                <span id="total-geral-restante" style="font-size: 18px;">R$ 0,00</span>
+              </div>
+            </div>
+          </div>
+         
+           <div>
+             <h4 style="color: #fff;margin-top: 10px;">Itens do Pedido:</h4>
+            <table id="tabela-itens">
+            <thead>
+              <tr>
+                <th>Vestuário</th>
+                <th>Malha</th>
+                <th>Cor</th>
+                <th>Tamanho</th>
+                <th>Qtd</th>
+                <th>Estampa</th>
+                <th>Custo Unid.</th>
+                <th>Valor Unid.</th>
+                <th>Total</th>
+                <th>Observação</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div id="loading-indicator">
+      <div class="spinner"></div>
+      <p style="margin-left: 20px;">Processando...</p>
+    </div>
+  </div>
+  <div id="notification-container"></div>
+  <script>
+    const notificationContainer = document.getElementById('notification-container');
+
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const body = document.body;
+
+    const itensPedido = [];
+    const tabela = document.querySelector('#tabela-itens tbody');
+
+    // Função helper para formatar valores monetários
+    function formatarMoeda(valor) {
+      return parseFloat(valor || 0).toFixed(2);
+    }
+
+    // Função helper para validar e converter valores numéricos
+    function validarNumero(valor, padrao = 0) {
+      const numero = parseFloat(valor);
+      return isNaN(numero) ? padrao : numero;
+    }
+
+    document.getElementById('btn-adicionar').onclick = () => {
+      const vestuario = document.getElementById('pedido-vestuario').value;
+      const malha = document.getElementById('pedido-malha').value;
+      const cor = document.getElementById('pedido-cor').value;
+      const tamanho = document.getElementById('pedido-tamanho').value;
+      const quantidade = parseInt(document.getElementById('pedido-quantidade').value || 1);
+      const estampa = document.getElementById('pedido-estampa').value;
+      const custoUnid = validarNumero(document.getElementById('pedido-custo-unid').value);
+      const valorUnid = validarNumero(document.getElementById('pedido-valor-unid').value);
+      const observacao = document.getElementById('pedido-observacao').value;
+
+      // Validações
+      if (!vestuario || !malha || !cor || !tamanho) {
+        showNotification('Por favor, preencha todos os campos obrigatórios do item.', 'error');
+        return;
+      }
+
+      if (isNaN(quantidade) || quantidade <= 0) {
+        showNotification('Por favor, insira uma quantidade válida.', 'error');
+        return;
+      }
+
+      if (custoUnid <= 0 || valorUnid <= 0) {
+        showNotification('Custo e valor unitários devem ser maiores que zero.', 'error');
+        return;
+      }
+
+      const valorTotalBruto = valorUnid * quantidade; // Valor total BRUTO (antes do desconto)
+
+      const item = {
+        vestuario,
+        malha,
+        cor,
+        tamanho,
+        quantidade,
+        estampa,
+        custoUnid,
+        valorUnid,
+        valorTotalBruto, // Valor bruto (antes do desconto)
+        observacao
+      };
+
+      itensPedido.push(item);
+      
+      // Limpar campos do item
+      document.getElementById('pedido-vestuario').value = '';
+      document.getElementById('pedido-malha').value = '';
+      document.getElementById('pedido-cor').value = '';
+      document.getElementById('pedido-tamanho').value = '';
+      document.getElementById('pedido-quantidade').value = 1;
+      document.getElementById('pedido-estampa').value = '';
+      document.getElementById('pedido-custo-unid').value = '';
+      document.getElementById('pedido-valor-unid').value = '';
+      document.getElementById('pedido-observacao').value = '';
+      
+      atualizarTotaisPedido();
+      renderTabela();
+      atualizarTotaisGerais(); // Atualizar totais gerais
+    };
+
+    function renderTabela() {
+      tabela.innerHTML = '';
+      itensPedido.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.vestuario}</td>
+          <td>${item.malha}</td>
+          <td>${item.cor}</td>
+          <td>${item.tamanho}</td>
+          <td>${item.quantidade}</td>
+          <td>${item.estampa}</td>
+          <td>R$ ${formatarMoeda(item.custoUnid)}</td>
+          <td>R$ ${formatarMoeda(item.valorUnid)}</td>
+          <td>R$ ${formatarMoeda(item.valorTotalBruto)}</td>
+          <td>${item.observacao}</td>
+          <td><button class="remove-item" onclick="removerItem(${index})">X</button></td>
+        `;
+        tabela.appendChild(tr);
+      });
+    }
+
+    function removerItem(index) {
+      itensPedido.splice(index, 1);
+      renderTabela();
+      atualizarTotaisGerais(); // Atualizar totais gerais após remover item
+    }
+
+    const form = document.getElementById('form-pedido');
+
+    document.getElementById('btn-concluir').onclick = async (event) => {
+      event.preventDefault();
+      showLoading();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      data['itens'] = itensPedido;
+      
+      // Adicionar a observação geral do pedido
+      const observacaoGeral = document.getElementById('pedido-observacao-geral').value;
+      data['observacaoGeral'] = observacaoGeral;
+      
+      if (data.nome == '' || data.telefone == '') {
+          showNotification('Nome e Telefone Obrigatórios.', 'error'); // Notificação de erro
+          hideLoading(); // Esconde o loading em caso de erro de validação
+          return; // Aborta o envio
+      }
+
+      if (!itensPedido.length) {
+        showNotification('Adicione ao menos um item ao pedido.', 'error');
+        hideLoading();
+        return;
+      }
+
+      // Validar se todos os itens têm valores numéricos válidos
+      for (let i = 0; i < itensPedido.length; i++) {
+        const item = itensPedido[i];
+        if (isNaN(item.custoUnid) || isNaN(item.valorUnid) || isNaN(item.quantidade)) {
+          showNotification(`Item ${i + 1}: Valores numéricos inválidos.`, 'error');
+          hideLoading();
+          return;
+        }
+      }
+
+      try {
+          const response = await fetch('/registrar-pedido', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+
+          if (response.ok) {
+              const result = await response.json(); // Se o backend retornar JSON
+              showNotification(result.message || 'Pedido registrado com sucesso!', 'success'); // Notificação de sucesso
+              form.reset();
+              setTimeout(() => window.location.reload(), 1000);
+          } else {
+              const errorData = await response.json();
+              showNotification(errorData.message || 'Erro ao registrar Pedido.', 'error'); // Notificação de erro
+              hideLoading();
+          }
+        
+      } catch (error) {
+          console.error('Erro de rede ou no servidor:', error);
+          showNotification('Erro de conexão ao registrar Pedido.', 'error'); // Notificação de erro de conexão
+      } finally {
+          hideLoading(); // ESCONDE O INDICADOR DE LOADING SEMPRE, independentemente do sucesso/falha
+      }
+      
+    };
+
+    const totalSpanPedido = document.getElementById('pedido-total');
+    const totalComDescontoSpanPedido = document.getElementById('pedido-total-desconto');
+    const totalApagarSpan = document.getElementById('totalApagar');
+    
+    // Novos campos para totais gerais
+    const totalGeralBrutoSpan = document.getElementById('total-geral-bruto');
+    const totalGeralComDescontoSpan = document.getElementById('total-geral-com-desconto');
+    const totalGeralPagoSpan = document.getElementById('total-geral-pago');
+    const totalGeralRestanteSpan = document.getElementById('total-geral-restante');
+    
+    const camposDinamicos = [
+      document.getElementById('pedido-quantidade'),
+      document.getElementById('pedido-custo-unid'),
+      document.getElementById('pedido-valor-unid'),
+      document.getElementById('pedido-desconto'),
+      document.getElementById('pedido-valor-pago')
+    ];
+
+    function atualizarTotaisPedido() {
+      const quantidade = parseInt(document.getElementById('pedido-quantidade').value || 1);
+      const custoUnid = validarNumero(document.getElementById('pedido-custo-unid').value);
+      const valorUnid = validarNumero(document.getElementById('pedido-valor-unid').value);
+
+      // Garantir que os valores sejam números válidos
+      if (isNaN(quantidade) || quantidade <= 0) {
+        return; // Retorna sem atualizar se algum valor for inválido
+      }
+
+      const totalBruto = valorUnid * quantidade; // Total BRUTO (antes do desconto)
+      
+      totalSpanPedido.innerText = totalBruto.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+      
+      // Atualizar totais gerais se houver itens
+      if (itensPedido.length > 0) {
+        atualizarTotaisGerais();
+      }
+    }
+
+    // Função para atualizar os totais gerais dos itens já adicionados
+    function atualizarTotaisGerais() {
+           if (itensPedido.length === 0) {
+         // Se não há itens, zerar todos os campos
+         totalGeralBrutoSpan.textContent = 'R$ 0,00';
+         totalGeralComDescontoSpan.textContent = 'R$ 0,00'; // Desconto Total
+         totalGeralPagoSpan.textContent = 'R$ 0,00';
+         totalGeralRestanteSpan.textContent = 'R$ 0,00';
+         return;
+       }
+
+      // Calcular totais gerais
+      const totalGeralBruto = itensPedido.reduce((sum, item) => sum + (item.valorTotalBruto || 0), 0);
+      const descontoPedido = validarNumero(document.getElementById('pedido-desconto').value);
+      const valorPagoPedido = validarNumero(document.getElementById('pedido-valor-pago').value);
+      const totalGeralComDesconto = totalGeralBruto - descontoPedido;
+      const totalGeralRestante = totalGeralComDesconto - valorPagoPedido;
+
+           // Atualizar os campos
+       totalGeralBrutoSpan.textContent = `R$ ${totalGeralBruto.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+       totalGeralComDescontoSpan.textContent = `R$ ${descontoPedido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`; // Mostrar apenas o desconto
+       totalGeralPagoSpan.textContent = `R$ ${valorPagoPedido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+       totalGeralRestanteSpan.textContent = `R$ ${(totalGeralRestante >= 0 ? totalGeralRestante : 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    }
+
+    camposDinamicos.forEach(campo => campo.addEventListener('input', atualizarTotaisPedido));
+
+    // Inicializar
+    atualizarTotaisPedido();
+    atualizarTotaisGerais(); // Inicializar totais gerais
+
+    // --- Funções de Controle do Loading ---
+    function showLoading() {
+        loadingIndicator.style.display = 'flex'; // Mostra o loading
+        body.classList.add('loading'); // Adiciona a classe para opacidade e desabilitar cliques
+    }
+
+    function hideLoading() {
+        loadingIndicator.style.display = 'none'; // Esconde o loading
+        body.classList.remove('loading'); // Remove a classe
+    }
+
+    // --- Função para Mostrar Notificação ---
+    function showNotification(message, type = 'success', duration = 3000) {
+        const notification = document.createElement('div');
+        notification.classList.add('notification');
+        notification.textContent = message;
+
+        if (type === 'error') {
+            notification.classList.add('error');
+        }
+
+        notificationContainer.prepend(notification); // Adiciona no início para novas notificações ficarem em cima
+
+        // Força o reflow para garantir que a transição funcione
+        void notification.offsetWidth;
+
+        notification.classList.add('show'); // Inicia a transição para mostrar
+
+        setTimeout(() => {
+            notification.classList.remove('show'); // Inicia a transição para esconder
+            // Remove o elemento do DOM após a transição de saída
+            notification.addEventListener('transitionend', () => {
+                notification.remove();
+            }, { once: true });
+        }, duration);
+    }
+
+  </script>
+
+</body>
+</html>

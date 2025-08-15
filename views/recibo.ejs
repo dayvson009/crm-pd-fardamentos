@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recibo - Pedido #<%= dadosRecibo.pedido.id %></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f9;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            font-size: 12px;
+            padding: 25px;
+        }
+
+        .header {
+            color: #6a7075;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header .pedido-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+
+        .status-badge {
+            background: <%= dadosRecibo.pedido.status === 'Entregue' ? '#28a745' : '#ffc107' %>;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .section::before {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 40px;
+            background-color: #e3e7ec;
+            position: absolute;
+            left: -40px;
+            bottom: -50px;
+            border-radius: 20px; 
+            top: -18px;
+        }
+
+        .section::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 40px;
+            background-color: #e3e7ec;
+            position: absolute;
+            right: -40px;
+            bottom: -50px;
+            border-radius: 20px;
+            top: -18px;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-top: 15px;
+            font-size: 1.3em;
+            border-top: 2px dashed #888;
+            padding-top: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .itens-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .itens-table th {
+            color: #333;
+            font-weight: bold;
+            text-align: left;
+        }
+        
+        .itens-table td {
+            border-bottom: 1px dotted #ccc;
+            text-align: left;
+            padding-top: 10px;
+        }
+
+        .itens-table tr {
+            margin-top: 10px;
+        }
+
+        .financial-summary {
+            display: flex;
+            justify-content: end;
+        }
+
+        .financial-summary .info-item:last-child {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #28a745;
+            border-top: 2px solid #777;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .footer {
+            padding: 20px 0px 0 0px;
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+
+        .footer .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #1aa5fb;
+            margin-bottom: 10px;
+        }
+
+        .footer .message {
+            color: #666;
+            font-style: italic;
+        }
+
+        .privacy-notice {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .privacy-notice h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .privacy-notice p {
+            color: #856404;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header .pedido-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .container {
+                border-radius: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Cabeçalho -->
+        <div class="header">
+            <h1>RECIBO DE PEDIDO</h1>
+            <div class="pedido-info">
+                <div>
+                    <strong>STATUS ATUAL</strong>
+                </div>
+                <div class="status-badge">
+                    <%= dadosRecibo.pedido.status %>
+                </div>
+            </div>
+        </div>
+        <!-- Conteúdo -->
+        <div class="content">
+            <!-- Informações do Pedido -->
+            <% if (dadosRecibo.mostrarDadosSensiveis) { %>
+            <div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Data do Pedido:</span>
+                        <span class="info-value"><%= dadosRecibo.pedido.dataHora.split(' ')[0] %></span>
+                    </div>
+                    <% if (dadosRecibo.pedido.dataEntrega) { %>
+                    <div class="info-item">
+                        <span class="info-label">Data de Entrega:</span>
+                        <span class="info-value"><%= dadosRecibo.pedido.dataEntrega %></span>
+                    </div>
+                    <% } %>
+                    <% if (dadosRecibo.pedido.localEntrega) { %>
+                    <div class="info-item">
+                        <span class="info-label">Local de Entrega:</span>
+                        <span class="info-value"><%= dadosRecibo.pedido.localEntrega %></span>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+            
+            <!-- Itens do Pedido -->
+            <div class="section">
+                <h2>ITENS DO PEDIDO</h2>
+                <table class="itens-table">
+                    <thead>
+                        <tr>
+                            <th>Vestuário</th>
+                            <th>Cor</th>
+                            <th>Tamanho</th>
+                            <th>Qtd</th>
+                            <th style="text-align: right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% dadosRecibo.itens.forEach((item, index) => { %>
+                        <tr>
+                            <td><%= item.vestuario %></td>
+                            <td><%= item.cor %></td>
+                            <td><%= item.tamanho %></td>
+                            <td style="text-align: center;"><%= item.quantidade %></td>
+                            <td style="text-align: right;"><strong>R$ <%= (parseFloat(item.valorUnid || 0) * parseInt(item.quantidade || 1)).toFixed(2) %></strong></td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Resumo Financeiro -->
+            <div class="financial-summary">
+                <h2></h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Valor Total Bruto:</span>
+                        <span class="info-value">R$ <%= parseFloat(dadosRecibo.pedido.valorTotal || 0).toFixed(2) %></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Desconto:</span>
+                        <span class="info-value" style="color: #dc3545;">- R$ <%= parseFloat(dadosRecibo.pedido.desconto || 0).toFixed(2) %></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Total com Desconto:</span>
+                        <span class="info-value">R$ <%= (parseFloat(dadosRecibo.pedido.valorTotal || 0) - parseFloat(dadosRecibo.pedido.desconto || 0)).toFixed(2) %></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Valor Pago:</span>
+                        <span class="info-value">R$ <%= parseFloat(dadosRecibo.pedido.valorPago || 0).toFixed(2) %></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Valor Restante:</span>
+                        <span class="info-value">R$ <%= parseFloat(dadosRecibo.pedido.valorRestante || 0).toFixed(2) %></span>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+            <!-- Observações -->
+            <% if (dadosRecibo.pedido.observacao) { %>
+            <div class="section">
+                <h2>OBSERVAÇÕES</h2>
+                <p style="color: #333; line-height: 1.6;"><%= dadosRecibo.pedido.observacao %></p>
+            </div>
+            <% } %>
+
+            <!-- Aviso de Privacidade para Pedidos Entregues -->
+            <% if (!dadosRecibo.mostrarDadosSensiveis) { %>
+            <div class="privacy-notice">
+                <h3>🔒 Proteção de Dados</h3>
+                <p>Este pedido foi entregue e, por questões de privacidade e segurança, alguns dados pessoais não são mais exibidos publicamente. Para informações adicionais, entre em contato conosco.</p>
+            </div>
+            <% } %>
+        </div>
+
+        <!-- Rodapé -->
+        <div class="footer">
+            <div class="logo"><img src="../images/logo-devgraphic.jpg" alt="devGraphic" style="width: 100px;"></div>
+            <div class="message">Pertinho de Você!</div>
+            <div class="message">Agradecemos sua preferência!</div>
+        </div>
+    </div>
+</body>
+</html> 

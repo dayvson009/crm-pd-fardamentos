@@ -1,0 +1,21 @@
+{
+  "name": "crm-pd-fardamentos",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "CRM para gestão de fardamentos",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "dayjs": "^1.11.13",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "googleapis": "^153.0.0"
+  }
+}

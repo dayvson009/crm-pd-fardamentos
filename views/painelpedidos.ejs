@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard - CRM Pedidos</title>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    td{
+      background-color: #fff;
+      padding: 5px;
+      padding: 15px;
+    }
+
+         .close {
+       background-color: #ff7373;
+       border: none;
+       border-radius: 5px;
+       margin: -5px 0 14px auto;
+       color: #fff;
+       font-weight: bold;
+       cursor: pointer;
+       display: block;
+       border-radius: 30px;
+       width: 35px;
+       height: 35px;
+       position: absolute;
+       right: 20px;
+     }
+
+    /* Estilos para o card melhorado */
+    .card {
+      background: #e8f1ff;
+      margin: 5px 0;
+      padding: 15px;
+      border-radius: 8px;
+      cursor: grab;
+      font-size: 14px;
+      position: relative;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .card-loja {
+      background: #7e30d2;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .card-data-entrega {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+
+    .data-verde { background-color: #4CAF50; color: white; }
+    .data-amarela { background-color: #FF9800; color: white; }
+    .data-vermelha { background-color: #f44336; color: white; }
+    .data-cinza { background-color: #9e9e9e; color: white; }
+
+    .card-itens {
+      margin-top: 10px;
+      border-top: 1px solid #ddd;
+      padding-top: 8px;
+    }
+
+    .card-itens-toggle {
+      background: #ffcc29;
+      color: #393939;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      margin-bottom: 5px;
+    }
+
+    .card-itens-content {
+      display: none;
+      background: rgba(255,255,255,0.7);
+      border-radius: 4px;
+      padding: 8px;
+      margin-top: 5px;
+    }
+
+    .card-item {
+      font-size: 11px;
+      padding: 2px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .card-item:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/sidebar') %>
+
+  <div style="padding: 20px; margin-left: 210px;">
+    <h2 class="title-page">Painel de Pedidos</h2>
+    
+    <!-- Mensagem informativa sobre arquivamento -->
+    <div class="infoPedidos">
+      <strong>ℹ️ Informação:</strong> Pedidos com status "Entregue" são automaticamente arquivados após 10 dias da data de entrega.
+      <br>
+    </div>
+    <br>
+    <div class="board">
+      <% ['Orçamentos', 'Pedidos', 'Arte', 'Corte', 'Costura', 'Estampa', 'Embalagem', 'Expedição', 'Entregue'].forEach(status => { %>
+        <div class="column">
+          <h3><%= status %></h3>
+          <div class="dropzone" data-status="<%= status %>">
+            <% (porStatus[status] || []).forEach(p => { %>
+              <div class="card" data-id="<%= p.id %>" onclick="abrirPopup(<%= JSON.stringify(p) %>)">
+                <div class="card-header">
+                  <div class="card-title">#<%= p.id %> - <%= p.nome %></div>
+                </div>
+                
+                <div>
+                  <small>Total: R$ <%= (parseFloat(p.valorTotal || 0) - parseFloat(p.desconto || 0)).toFixed(2) %></small>
+                  <br />
+                  <small>Pagou: R$ <%= parseFloat(p.valorPago || 0).toFixed(2) %></small>
+                </div>
+
+                <% if (p.dataEntrega) { %>
+                  <div class="card-data-entrega" data-data-entrega="<%= p.dataEntrega %>" data-status="<%= p.status %>">
+                    📅 <span class="data-text"></span>
+                  </div>
+                <% } %>
+
+                <div class="card-itens">
+                  <button class="card-itens-toggle" onclick="toggleItens(event, '<%= p.id %>')">
+                    📋 Mostrar Itens
+                  </button>
+                  <div class="card-itens-content" id="itens-<%= p.id %>">
+                    <div class="card-item">Carregando itens...</div>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+    <div id="popup" class="popup" style="position: absolute; top: 20px;"></div>
+  </div>
+  <script>
+    // Funções helper para data de entrega
+    function formatDataEntrega(dataString) {
+      if (!dataString) return '';
+      
+      try {
+        const data = new Date(dataString);
+        if (isNaN(data.getTime())) return dataString;
+        
+        return data.toLocaleDateString('pt-BR');
+      } catch (error) {
+        return dataString;
+      }
+    }
+
+    function getDataEntregaClass(dataString, status) {
+      if (status === 'Entregue') return 'data-cinza';
+      if (!dataString) return '';
+      
+      try {
+        const dataEntrega = new Date(dataString);
+        const hoje = new Date();
+        const diffTime = dataEntrega.getTime() - hoje.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays < 0) return 'data-vermelha'; // Atrasado
+        if (diffDays <= 1) return 'data-vermelha'; // 1 dia ou menos
+        if (diffDays <= 3) return 'data-amarela'; // 2-3 dias
+        return 'data-verde'; // Mais de 3 dias
+      } catch (error) {
+        return '';
+      }
+    }
+
+    // Processar datas de entrega dinamicamente
+    document.addEventListener('DOMContentLoaded', function() {
+      const dataElements = document.querySelectorAll('.card-data-entrega');
+      
+      dataElements.forEach(element => {
+        const dataEntrega = element.getAttribute('data-data-entrega');
+        const status = element.getAttribute('data-status');
+        const dataText = element.querySelector('.data-text');
+        
+        if (dataEntrega && dataText) {
+          // Formatar a data
+          const dataFormatada = formatDataEntrega(dataEntrega);
+          dataText.textContent = dataFormatada;
+          
+          // Aplicar a classe CSS baseada na data
+          const dataClass = getDataEntregaClass(dataEntrega, status);
+          if (dataClass) {
+            element.classList.add(dataClass);
+          }
+        }
+      });
+    });
+
+    const zonas = document.querySelectorAll('.dropzone');
+    zonas.forEach(z => {
+      new Sortable(z, {
+        group: 'pedidos',
+        animation: 150,
+        onAdd: async function (evt) {
+          const card = evt.item;
+          const novoStatus = evt.to.dataset.status;
+          const idPedido = card.dataset.id;
+
+          const res = await fetch('/atualizar-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idPedido, novoStatus })
+          });
+
+          if (!res.ok) alert('Erro ao atualizar status.');
+        }
+      });
+    });
+
+    let pedidoAtual = null;
+
+    // Função para alternar a exibição dos itens
+    async function toggleItens(event, pedidoId) {
+      event.stopPropagation(); // Evita que o clique propague para o card
+      
+      const itensContent = document.getElementById(`itens-${pedidoId}`);
+      const toggleButton = event.target;
+      
+      if (itensContent.style.display === 'none' || itensContent.style.display === '') {
+        // Carregar e mostrar itens
+        try {
+          const res = await fetch(`/itens-do-pedido?id=${pedidoId}`);
+          const itens = await res.json();
+          
+          if (itens.length > 0) {
+            itensContent.innerHTML = itens.map(item => 
+              `<div class="card-item">• ${item.vestuario} - ${item.cor} - ${item.tamanho} - Qtd: ${item.quantidade}</div>`
+            ).join('');
+          } else {
+            itensContent.innerHTML = '<div class="card-item">Nenhum item encontrado</div>';
+          }
+          
+          itensContent.style.display = 'block';
+          toggleButton.textContent = '📋 Ocultar Itens';
+        } catch (error) {
+          console.error('Erro ao carregar itens:', error);
+          itensContent.innerHTML = '<div class="card-item">Erro ao carregar itens</div>';
+          itensContent.style.display = 'block';
+        }
+      } else {
+        // Ocultar itens
+        itensContent.style.display = 'none';
+        toggleButton.textContent = '📋 Mostrar Itens';
+      }
+    }
+
+    async function abrirPopup(pedido) {
+      pedidoAtual = pedido;
+      const popup = document.getElementById('popup');
+
+      // Buscar itens da aba Itens com mesmo Nº Pedido
+      const res = await fetch('/itens-do-pedido?id=' + pedido.id);
+      const itens = await res.json();
+      
+             popup.innerHTML = `
+       <button onclick="document.getElementById('popup').style.display='none'" class="buttons close">X</button>
+       
+               <!-- Cabeçalho do Recibo -->
+        <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px;">
+          <h2 style="margin: 0; color: #333; font-size: 24px;">PEDIDO</h2>
+         <div style="display: flex; justify-content: space-between; margin-top: 15px; font-size: 14px;">
+           <div>
+             <strong>Pedido #${pedido.id}</strong>
+           </div>
+           <div>
+             <strong>Local Entrega:</strong> ${pedido.localEntrega || 'N/A'}
+           </div>
+           <div>
+             <label>Data de Entrega:</label>
+             <input type="date" id="editar-data" value="${pedido.dataEntrega || ''}" style="margin-left: 5px; padding: 3px;">
+           </div>
+         </div>
+       </div>
+
+               <!-- Informações do Cliente -->
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <h3 style="margin: 0 0 10px 0; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px;">DADOS DO CLIENTE</h3>
+         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+           <div>
+             <p style="margin: 5px 0;"><strong>Nome:</strong> ${pedido.nome}</p>
+             <p style="margin: 5px 0;"><strong>Telefone:</strong> ${pedido.telefone}</p>
+           </div>
+           <div>
+             <p style="margin: 5px 0;"><strong>Data do Pedido:</strong> ${pedido.dataHora}</p>
+             <a href="https://wa.me/55${pedido.telefone.replace(/\D/g, '')}" target="_blank" style="color: #25D366; text-decoration: none; font-weight: bold;">📲 WhatsApp</a>
+           </div>
+         </div>
+       </div>
+
+               <!-- Itens do Pedido -->
+        <div style="margin-bottom: 20px;">
+          <h3 style="margin: 0 0 15px 0; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px;">ITENS DO PEDIDO</h3>
+         <table id="tabela-editar-itens" style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                       <thead>
+              <tr style="background: #1aa5fb; color: white;">
+                <th style="padding: 12px; text-align: left; border: none;">Vestuário</th>
+                <th style="padding: 12px; text-align: center; border: none;">Cor</th>
+                <th style="padding: 12px; text-align: center; border: none;">Tamanho</th>
+                <th style="padding: 12px; text-align: center; border: none;">Qtd</th>
+                <th style="padding: 12px; text-align: right; border: none;">Valor Unit.</th>
+                <th style="padding: 12px; text-align: right; border: none;">Total</th>
+                <th style="padding: 12px; text-align: center; border: none;">Observação</th>
+              </tr>
+            </thead>
+           <tbody>
+             ${itens.map((item, i) => {
+               const valorUnitario = parseFloat(item.valorUnid || 0);
+               const totalItem = valorUnitario * parseInt(item.quantidade || 1);
+               return `
+                 <tr style="border-bottom: 1px solid #eee;">
+                   <td style="padding: 12px; border: none;">${item.vestuario}</td>
+                   <td style="padding: 12px; text-align: center; border: none;">${item.cor}</td>
+                   <td style="padding: 12px; text-align: center; border: none;">${item.tamanho}</td>
+                   <td style="padding: 12px; text-align: center; border: none;">${item.quantidade}</td>
+                   <td style="padding: 12px; text-align: right; border: none;">R$ ${valorUnitario.toFixed(2)}</td>
+                   <td style="padding: 12px; text-align: right; border: none; font-weight: bold;">R$ ${totalItem.toFixed(2)}</td>
+                   <td style="padding: 12px; text-align: center; border: none; font-size: 12px;">${item.observacao || '-'}</td>
+                 </tr>
+               `;
+             }).join('')}
+           </tbody>
+         </table>
+       </div>
+
+               <!-- Resumo Financeiro -->
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <h3 style="margin: 0 0 15px 0; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px;">RESUMO FINANCEIRO</h3>
+         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+           <div>
+             <div style="display: flex; justify-content: space-between; margin: 8px 0;">
+               <span><strong>Valor Total Bruto:</strong></span>
+               <span>R$ ${parseFloat(pedido.valorTotal || 0).toFixed(2)}</span>
+             </div>
+             <div style="display: flex; justify-content: space-between; margin: 8px 0;">
+               <span><strong>Desconto:</strong></span>
+               <span style="color: #dc3545;">- R$ ${parseFloat(pedido.desconto || 0).toFixed(2)}</span>
+             </div>
+             <div style="display: flex; justify-content: space-between; margin: 8px 0; font-size: 18px; font-weight: bold; border-top: 1px solid #ddd; padding-top: 8px;">
+               <span>Total com Desconto:</span>
+               <span style="color: #28a745;">R$ ${(parseFloat(pedido.valorTotal || 0) - parseFloat(pedido.desconto || 0)).toFixed(2)}</span>
+             </div>
+           </div>
+           <div>
+             <div style="display: flex; justify-content: space-between; margin: 8px 0;">
+               <span><strong>Valor Pago:</strong></span>
+               <div>
+                 <input type="number" id="editar-pago" value="${parseFloat(pedido.valorPago || 0).toFixed(2)}" step="0.01" min="0" style="width: 100px; padding: 13px; border: 1px solid #ddd; border-radius: 4px; text-align: right;">
+               </div>
+             </div>
+             <div style="display: flex; justify-content: space-between; margin: 8px 0; font-size: 18px; font-weight: bold; border-top: 1px solid #ddd; padding-top: 8px;">
+               <span>Valor Restante:</span>
+               <span style="color: #ffc107;">R$ ${parseFloat(pedido.valorRestante || 0).toFixed(2)}</span>
+             </div>
+           </div>
+         </div>
+       </div>
+
+       <!-- Observações -->
+       <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+         <h3 style="margin: 0 0 10px 0; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px;">📝 OBSERVAÇÕES</h3>
+         <textarea id="editar-obs" placeholder="Observações gerais sobre o pedido..." style="width: 100%; min-height: 80px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical; font-family: inherit;">${pedido.observacao || ''}</textarea>
+       </div>
+
+               <!-- Botões de Ação -->
+        <div style="text-align: center; margin-top: 10px; display: flex; gap: 15px; justify-content: center;">
+          <button onclick="salvarAlteracoes()" class="buttons" style="background: #1aa5fb; color: white; border: none; padding: 12px 30px; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 0;">💾 Salvar Alterações</button>
+          <button onclick="copiarRecibo()" class="buttons" style="background: #28a745; color: white; border: none; padding: 12px 30px; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 0;">📋 Copiar Recibo</button>
+        </div>
+       `;
+      popup.style.display = 'block';
+    }
+
+    async function salvarAlteracoes() {
+
+      const payload = {
+        id: pedidoAtual.id,
+        pago: parseFloat(document.getElementById('editar-pago').value) || 0,
+        dataEntrega: document.getElementById('editar-data').value,
+        observacao: document.getElementById('editar-obs').value,
+      };
+
+      const res = await fetch('/editar-pedido', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        alert('Pedido atualizado!');
+        location.reload();
+             } else {
+         alert('Erro ao salvar alterações.');
+       }
+     }
+
+     // Função para copiar recibo como texto para WhatsApp
+     async function copiarRecibo() {
+       try {
+         // Buscar itens atualizados
+         const res = await fetch('/itens-do-pedido?id=' + pedidoAtual.id);
+         const itens = await res.json();
+         
+         // Obter valores atuais dos campos
+         const valorPago = document.getElementById('editar-pago').value || '0';
+         const dataEntrega = document.getElementById('editar-data').value || '';
+         const observacao = document.getElementById('editar-obs').value || '';
+         
+         // Calcular total com desconto
+         const totalBruto = parseFloat(pedidoAtual.valorTotal || 0);
+         const desconto = parseFloat(pedidoAtual.desconto || 0);
+         const totalComDesconto = totalBruto - desconto;
+         
+         // Formatar data de entrega
+         const dataEntregaFormatada = dataEntrega ? new Date(dataEntrega).toLocaleDateString('pt-BR') : 'Não definida';
+         const dataPedido = new Date(pedidoAtual.dataHora.split(' ')[0]).toLocaleDateString('pt-BR');
+
+         console.log(pedidoAtual.dataHora);
+         
+         // Gerar texto do recibo
+         let reciboTexto = `*PEDIDO #${pedidoAtual.id}*\n`;
+         reciboTexto += `> *Data do Pedido:* ${dataPedido}\n`;
+         reciboTexto += `*Data de Entrega:* ${dataEntregaFormatada}\n`;
+         reciboTexto += `*Local de Entrega:* ${pedidoAtual.localEntrega || 'Não informado'}\n\n`;
+         
+         reciboTexto += `*CLIENTE:*\n`;
+         reciboTexto += `Nome: ${pedidoAtual.nome}\n`;
+         reciboTexto += `Telefone: ${pedidoAtual.telefone}\n`;
+         reciboTexto += `\n`;
+         
+         reciboTexto += `*ITENS DO PEDIDO:*\n`;
+         itens.forEach((item, index) => {
+           const valorUnitario = parseFloat(item.valorUnid || 0);
+           const totalItem = valorUnitario * parseInt(item.quantidade || 1);
+           reciboTexto += `${index + 1}. ${item.vestuario} - ${item.cor} - ${item.tamanho}\n`;
+           reciboTexto += `   Qtd: ${item.quantidade} | Valor Unit: R$ ${valorUnitario.toFixed(2)} | Total: R$ ${totalItem.toFixed(2)}\n`;
+           if (item.observacao) {
+             reciboTexto += `   Obs: ${item.observacao}\n`;
+           }
+           reciboTexto += `\n`;
+         });
+         
+         reciboTexto += `*PAGAMENTO:*\n`;
+         reciboTexto += `Valor Total: R$ ${totalBruto.toFixed(2)}\n`;
+         reciboTexto += `Desconto: R$ ${desconto.toFixed(2)}\n`;
+         reciboTexto += `Total com Desconto: R$ ${totalComDesconto.toFixed(2)}\n`;
+         reciboTexto += `----------\n`;
+         reciboTexto += `Valor Pago: R$ ${parseFloat(valorPago).toFixed(2)}\n`;
+         reciboTexto += `Valor Restante: R$ ${(totalComDesconto - parseFloat(valorPago)).toFixed(2)}\n\n`;
+         
+         if (observacao) {
+           reciboTexto += `*OBSERVAÇÕES:*\n${observacao}\n\n`;
+         }
+         
+         reciboTexto += `---\n`;
+         reciboTexto += `_Acompanhe Seu Pedido_ - https://grafica.siteee.com.br/recibo/${pedidoAtual.id}\n`;
+         reciboTexto += `---\n`;
+         reciboTexto += `*devGraphic* - Agradece sua preferência!`;
+         
+         // Copiar para a área de transferência
+         await navigator.clipboard.writeText(reciboTexto);
+         
+         // Mostrar notificação de sucesso
+         alert('Recibo copiado para a área de transferência! Cole no WhatsApp para enviar ao cliente.');
+         
+       } catch (error) {
+         console.error('Erro ao copiar recibo:', error);
+         alert('Erro ao copiar recibo. Tente novamente.');
+       }
+     }
+
+     // Função para mostrar estatísticas de pedidos arquivados
+     async function mostrarEstatisticasArquivados() {
+       try {
+         const res = await fetch('/estatisticas-arquivados');
+         const estatisticas = await res.json();
+         
+         let mensagem = '📊 ESTATÍSTICAS DE PEDIDOS ARQUIVADOS\n\n';
+         mensagem += `Total de pedidos arquivados: ${estatisticas.totalArquivados}\n`;
+         mensagem += `Pedidos arquivados este mês: ${estatisticas.arquivadosEsteMes}\n`;
+         mensagem += `Último arquivamento: ${estatisticas.ultimoArquivamento || 'N/A'}\n\n`;
+         mensagem += 'ℹ️ Pedidos são arquivados automaticamente 10 dias após a entrega.';
+         
+         alert(mensagem);
+       } catch (error) {
+         console.error('Erro ao buscar estatísticas:', error);
+         alert('Erro ao buscar estatísticas de arquivados.');
+       }
+     }
+
+     // Função para testar o arquivamento manualmente
+     async function testarArquivamento() {
+       const resposta = confirm('Tem certeza que deseja testar o arquivamento manualmente? Isso pode afetar o status real dos pedidos.');
+       if (resposta) {
+         try {
+           const res = await fetch('/testar-arquivamento');
+           const data = await res.json();
+           
+           let mensagem = '🧪 TESTE DE ARQUIVAMENTO CONCLUÍDO\n\n';
+           mensagem += `Pedidos arquivados neste teste: ${data.pedidosArquivados}\n`;
+           mensagem += `Total antes: ${data.totalAntes}\n`;
+           mensagem += `Total depois: ${data.totalDepois}\n\n`;
+           mensagem += 'Verifique os logs do console para mais detalhes.';
+           
+           alert(mensagem);
+           
+           // Recarrega a página para mostrar os pedidos arquivados
+           if (data.pedidosArquivados > 0) {
+             location.reload();
+           }
+         } catch (error) {
+           console.error('Erro ao testar arquivamento:', error);
+           alert('Erro ao testar arquivamento. Tente novamente.');
+         }
+       }
+     }
+
+  </script>
+</body>
+</html>

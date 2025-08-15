@@ -1,0 +1,475 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body{
+  font-family: Arial;
+  background-color: #4f4e4b;
+  padding: 10px;
+}
+
+.sidebar{
+  width: 200px;
+  padding: 10px;
+  background: #000;
+  height: 95vh;
+  position: fixed;
+  border-radius: 10px;
+}
+
+.sidebar .logo{
+  margin: 10px auto 27px;
+  display: block;
+}
+
+.sidebar ul{
+  list-style: none; padding: 0;
+}
+
+.sidebar ul li{
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.sidebar ul a{
+  text-decoration: none;
+  font-weight: bold;
+  color: #cecedb;
+  width: 100%;
+  display: block;
+}
+
+.sidebar ul li.active{
+  background-color: #ffcc29;
+}
+
+.sidebar ul li.active a{
+  color: #444;
+}
+
+/* Layout das páginas */
+
+.title-page{
+  color: #ffcc29;
+  margin-bottom: 25px;
+}
+
+.infoPedidos{
+  background: #393939;
+  border: 1px solid #f9eecc;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  color: #f9eecc;
+}
+
+/* Avisos */
+
+.card-avisos {
+  background: #fff;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 12px -3px #ccc;
+  margin-bottom: 10px;
+}
+
+.card-avisos button{
+  border: none;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.form-avisos{
+  background: #000;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  max-width: 400px;
+}
+
+.form-avisos input, .form-avisos select, .form-avisos textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #fff;
+}
+
+.form-avisos label{
+  font-weight: bold;
+  color: #fff;
+}
+
+.form-avisos textarea{
+  min-height: 200px;
+}
+
+.form-avisos button {
+  padding: 10px 15px;
+  background: #ffcc29;
+  color: #3c3c3c;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Vendas */
+
+.form-vendas{
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #000;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.form-vendas label{
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 5px;
+  display: block;
+  font-size: .9em;
+  margin-right: 20px;
+}
+
+.form-vendas input[type="radio"]{
+  margin-right: 4px;
+  margin-top: 2px;
+}
+
+.form-vendas select, .form-vendas input{
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #fff;
+  border: 1px solid #d9d9d9;
+  margin-bottom: 20px;
+  margin-right: 20px;
+}
+
+.card-value {
+  padding: 10px 20px 5px 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #000;
+}
+
+.card-value span{
+  font-size: 2em;
+  display: block;
+  text-align: right;
+  font-weight: bold;
+  color: #ffcc29;
+}
+
+.card-value strong{
+  color: #ccc;
+}
+
+.card-value span:before{
+  content: "R$";
+  font-size: .5em;
+  position: relative;
+  bottom: 10px;
+  color: #aaa;
+  margin-right: 5px;
+}
+
+.form-vendas button{
+  padding: 10px 20px;
+  background-color: #ffcc29;
+  color: #202020;
+  border-radius: 5px;
+  border: none;
+  width: 100%;
+}
+
+#tabela-itens{
+  background-color: #eaeaea;
+  border-radius: 10px;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+#tabela-itens th{
+  padding: 10px;
+  color: #2d2d2d;
+}
+#tabela-itens tr{
+  border-bottom: 1px solid #eaeaea;
+}
+#tabela-itens td{
+  padding: 10px;
+  text-align: center;
+  color: #444;
+}
+
+.remove-item{
+  border-radius: 20px;
+  border: none;
+  width: 20px;
+  height: 20px;
+  background-color: #f00;
+  color: #fff;
+}
+
+/* Painel de Pedidos */
+
+.dashboard{
+      min-width: 1100px;
+    }
+    .board { display: flex; gap: 10px; }
+
+    .column {
+      background: #d2d2d2;
+      padding: 10px;
+      border-radius: 8px;
+      width: 16%;
+      min-height: 300px;
+      min-width: 180px;
+    }
+    .column h3 {
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 16px;
+      margin-top: -35px;
+      color: #fff;
+    }
+    .card {
+      background: #fbfbfb;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: grab;
+      font-size: 14px;
+    }
+    .popup {
+      display: none;
+      position: fixed;
+      background: #f5f5fb;
+      padding: 20px;
+      border-radius: 10px;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 0 40px #888;
+      z-index: 999;
+      border: 2px solid #7c3ac8;
+    }
+    .dropzone{
+      height: 100%;
+    }
+
+    .client{
+      background-color: #ffff;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      line-height: 150%;
+    }
+
+    .client label{
+      font-weight: bold;
+    }
+
+    .division {
+      margin: 20px;
+      text-align: center;
+      color: #7e30d2;
+    }
+
+    #tabela-editar-itens{
+      width: 100%;
+    }
+
+    #tabela-editar-itens input {
+      border: none;
+      padding: 10px;
+    }
+
+    #tabela-editar-itens .remove {
+      width: 30px;
+      height: 30px;
+      border-radius: 20px;
+      border: none;
+      background-color: #ff4b4b;
+      margin: 0 auto;
+      display: block;
+      cursor: pointer;
+    }
+
+    .buttons{
+      padding: 10px;
+      background-color: #1aa5fb;
+      border: none;
+      border-radius: 5px;
+      margin-right: 10px;
+      margin-top: 20px;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+/* Loading */
+
+/* Estilos para o Loading */
+    #loading-indicator {
+        display: none; /* Escondido por padrão */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.8); /* Fundo semi-transparente */
+        justify-content: center;
+        align-items: center;
+        font-size: 2em;
+        color: #333;
+        z-index: 9999; /* Garante que fique acima de tudo */
+    }
+
+    /* Opcional: Estilo para o spinner (exemplo simples de CSS) */
+    .spinner {
+        border: 8px solid #f3f3f3; /* Light grey */
+        border-top: 8px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1.5s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Estilo para esconder o conteúdo principal enquanto o loading está ativo */
+    body.loading > *:not(#loading-indicator) {
+        opacity: 0.5; /* Escurece um pouco o conteúdo */
+        pointer-events: none; /* Desabilita cliques no conteúdo */
+    }
+
+    /* --- Estilos para a Notificação Flutuante --- */
+    #notification-container {
+        position: fixed;
+        top: 20px; /* Distância do topo */
+        right: 20px; /* Distância da direita */
+        z-index: 10000; /* Acima de tudo */
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* Espaço entre as notificações se houver mais de uma */
+    }
+
+    .notification {
+        background-color: #4CAF50; /* Cor de sucesso */
+        color: white;
+        padding: 15px 25px;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        opacity: 0; /* Começa invisível */
+        transform: translateX(100%); /* Começa fora da tela para a direita */
+        transition: opacity 0.5s ease-out, transform 0.5s ease-out; /* Transição suave */
+        min-width: 250px;
+        max-width: 350px;
+    }
+
+    .notification.show {
+        opacity: 1; /* Torna visível */
+        transform: translateX(0); /* Desliza para a posição */
+    }
+
+    .notification.error {
+        background-color: #f44336; /* Cor de erro */
+    }
+
+/* Estilos para o campo de busca com autocomplete */
+.search-container {
+    position: relative;
+    display: inline-block;
+}
+
+.search-container input[type="text"] {
+    width: 300px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.search-container input[type="text"]:focus {
+    outline: none;
+    border-color: #1aa5fb;
+    box-shadow: 0 0 0 2px rgba(26, 165, 251, 0.2);
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.search-result-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+.search-result-item:hover {
+    background-color: #f8f9fa;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item.selected {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.search-result-item .product-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.search-result-item .product-price {
+    font-size: 12px;
+    color: #666;
+    margin-top: 2px;
+}
+
+.search-result-item .product-code {
+    font-size: 11px;
+    color: #999;
+    font-style: italic;
+}
+
+/* Estilo para quando não há resultados */
+.search-no-results {
+    padding: 15px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
+/* Estilo para o campo quando um produto é selecionado */
+.search-container input[type="text"].selected {
+    background-color: #e8f5e8;
+    border-color: #4caf50;
+}

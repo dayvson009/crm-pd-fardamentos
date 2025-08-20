@@ -133,9 +133,9 @@
                 </div>
                 
                 <div>
-                  <small>Total: R$ <%= (parseFloat(p.valorTotal || 0) - parseFloat(p.desconto || 0)).toFixed(2) %></small>
+                  <small>Total: R$ <%= (parseFloat(p.valorTotal || 0) - parseFloat(p.desconto || 0)).toFixed(2).replace('.', ',') %></small>
                   <br />
-                  <small>Pagou: R$ <%= parseFloat(p.valorPago || 0).toFixed(2) %></small>
+                  <small>Pagou: R$ <%= parseFloat(p.valorPago || 0).toFixed(2).replace('.', ',') %></small>
                 </div>
 
                 <% if (p.dataEntrega) { %>
@@ -354,8 +354,8 @@
                    <td style="padding: 12px; text-align: center; border: none;">${item.cor}</td>
                    <td style="padding: 12px; text-align: center; border: none;">${item.tamanho}</td>
                    <td style="padding: 12px; text-align: center; border: none;">${item.quantidade}</td>
-                   <td style="padding: 12px; text-align: right; border: none;">R$ ${valorUnitario.toFixed(2)}</td>
-                   <td style="padding: 12px; text-align: right; border: none; font-weight: bold;">R$ ${totalItem.toFixed(2)}</td>
+                   <td style="padding: 12px; text-align: right; border: none;">R$ ${valorUnitario.toFixed(2).replace('.', ',')}</td>
+                   <td style="padding: 12px; text-align: right; border: none; font-weight: bold;">R$ ${totalItem.toFixed(2).replace('.', ',')}</td>
                    <td style="padding: 12px; text-align: center; border: none; font-size: 12px;">${item.observacao || '-'}</td>
                  </tr>
                `;
@@ -371,15 +371,15 @@
            <div>
              <div style="display: flex; justify-content: space-between; margin: 8px 0;">
                <span><strong>Valor Total Bruto:</strong></span>
-               <span>R$ ${parseFloat(pedido.valorTotal || 0).toFixed(2)}</span>
+               <span>R$ ${parseFloat(pedido.valorTotal || 0).toFixed(2).replace('.', ',')}</span>
              </div>
              <div style="display: flex; justify-content: space-between; margin: 8px 0;">
                <span><strong>Desconto:</strong></span>
-               <span style="color: #dc3545;">- R$ ${parseFloat(pedido.desconto || 0).toFixed(2)}</span>
+               <span style="color: #dc3545;">- R$ ${parseFloat(pedido.desconto || 0).toFixed(2).replace('.', ',')}</span>
              </div>
              <div style="display: flex; justify-content: space-between; margin: 8px 0; font-size: 18px; font-weight: bold; border-top: 1px solid #ddd; padding-top: 8px;">
                <span>Total com Desconto:</span>
-               <span style="color: #28a745;">R$ ${(parseFloat(pedido.valorTotal || 0) - parseFloat(pedido.desconto || 0)).toFixed(2)}</span>
+               <span style="color: #28a745;">R$ ${(parseFloat(pedido.valorTotal || 0) - parseFloat(pedido.desconto || 0)).toFixed(2).replace('.', ',')}</span>
              </div>
            </div>
            <div>
@@ -391,7 +391,7 @@
              </div>
              <div style="display: flex; justify-content: space-between; margin: 8px 0; font-size: 18px; font-weight: bold; border-top: 1px solid #ddd; padding-top: 8px;">
                <span>Valor Restante:</span>
-               <span style="color: #ffc107;">R$ ${parseFloat(pedido.valorRestante || 0).toFixed(2)}</span>
+               <span style="color: #ffc107;">R$ ${parseFloat(pedido.valorRestante || 0).toFixed(2).replace('.', ',')}</span>
              </div>
            </div>
          </div>
@@ -453,10 +453,8 @@
          const totalComDesconto = totalBruto - desconto;
          
          // Formatar data de entrega
-         const dataEntregaFormatada = dataEntrega ? new Date(dataEntrega).toLocaleDateString('pt-BR') : 'Não definida';
-         const dataPedido = new Date(pedidoAtual.dataHora.split(' ')[0]).toLocaleDateString('pt-BR');
-
-         console.log(pedidoAtual.dataHora);
+         const dataEntregaFormatada = dataEntrega ? new Date(`${dataEntrega}T12:00:00`).toLocaleDateString('pt-BR') : 'Não definida';
+         const dataPedido = pedidoAtual.dataHora.split(' ')[0].replace(/-/g, '/');
          
          // Gerar texto do recibo
          let reciboTexto = `*PEDIDO #${pedidoAtual.id}*\n`;
@@ -494,7 +492,7 @@
          }
          
          reciboTexto += `---\n`;
-         reciboTexto += `_Acompanhe Seu Pedido_ - https://grafica.siteee.com.br/recibo/${pedidoAtual.id}\n`;
+         reciboTexto += `_Acompanhe Seu Pedido_ - https://pdfardamentos.siteee.com.br/recibo/${pedidoAtual.id}\n`;
          reciboTexto += `---\n`;
          reciboTexto += `*devGraphic* - Agradece sua preferência!`;
          

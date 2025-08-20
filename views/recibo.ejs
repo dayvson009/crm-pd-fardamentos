@@ -159,6 +159,8 @@
             font-weight: bold;
             color: #1aa5fb;
             margin-bottom: 10px;
+            background-color: #000000;
+            border-radius: 8px;
         }
 
         .footer .message {
@@ -223,12 +225,12 @@
                 <div class="info-grid">
                     <div class="info-item">
                         <span class="info-label">Data do Pedido:</span>
-                        <span class="info-value"><%= dadosRecibo.pedido.dataHora.split(' ')[0] %></span>
+                        <span class="info-value"><%= dadosRecibo.pedido.dataHora.split(' ')[0].split('-').join('/') %></span>
                     </div>
                     <% if (dadosRecibo.pedido.dataEntrega) { %>
                     <div class="info-item">
                         <span class="info-label">Data de Entrega:</span>
-                        <span class="info-value"><%= dadosRecibo.pedido.dataEntrega %></span>
+                        <span class="info-value"><%= dadosRecibo.pedido.dataEntrega.split('-').reverse().join('/') %></span>
                     </div>
                     <% } %>
                     <% if (dadosRecibo.pedido.localEntrega) { %>
@@ -260,7 +262,7 @@
                             <td><%= item.cor %></td>
                             <td><%= item.tamanho %></td>
                             <td style="text-align: center;"><%= item.quantidade %></td>
-                            <td style="text-align: right;"><strong>R$ <%= (parseFloat(item.valorUnid || 0) * parseInt(item.quantidade || 1)).toFixed(2) %></strong></td>
+                            <td style="text-align: right;"><strong>R$ <%= (parseFloat(item.valorUnid || 0) * parseInt(item.quantidade || 1)).toFixed(2).replace('.', ',') %></strong></td>
                         </tr>
                         <% }); %>
                     </tbody>
@@ -273,23 +275,23 @@
                 <div class="info-grid">
                     <div class="info-item">
                         <span class="info-label">Valor Total Bruto:</span>
-                        <span class="info-value">R$ <%= parseFloat(dadosRecibo.pedido.valorTotal || 0).toFixed(2) %></span>
+                        <span class="info-value">R$ <%= parseFloat(dadosRecibo.pedido.valorTotal || 0).toFixed(2).replace('.', ',') %></span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Desconto:</span>
-                        <span class="info-value" style="color: #dc3545;">- R$ <%= parseFloat(dadosRecibo.pedido.desconto || 0).toFixed(2) %></span>
+                        <span class="info-value" style="color: #dc3545;">- R$ <%= parseFloat(dadosRecibo.pedido.desconto || 0).toFixed(2).replace('.', ',') %></span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Total com Desconto:</span>
-                        <span class="info-value">R$ <%= (parseFloat(dadosRecibo.pedido.valorTotal || 0) - parseFloat(dadosRecibo.pedido.desconto || 0)).toFixed(2) %></span>
+                        <span class="info-value">R$ <%= (parseFloat(dadosRecibo.pedido.valorTotal || 0) - parseFloat(dadosRecibo.pedido.desconto || 0)).toFixed(2).replace('.', ',') %></span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Valor Pago:</span>
-                        <span class="info-value">R$ <%= parseFloat(dadosRecibo.pedido.valorPago || 0).toFixed(2) %></span>
+                        <span class="info-value">R$ <%= parseFloat(dadosRecibo.pedido.valorPago || 0).toFixed(2).replace('.', ',') %></span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Valor Restante:</span>
-                        <span class="info-value">R$ <%= parseFloat(dadosRecibo.pedido.valorRestante || 0).toFixed(2) %></span>
+                        <span class="info-value">R$ <%= parseFloat(dadosRecibo.pedido.valorRestante || 0).toFixed(2).replace('.', ',') %></span>
                     </div>
                 </div>
             </div>
@@ -313,7 +315,7 @@
 
         <!-- Rodapé -->
         <div class="footer">
-            <div class="logo"><img src="../images/logo-devgraphic.jpg" alt="devGraphic" style="width: 100px;"></div>
+            <div class="logo"><img src="../images/pd.png" alt="pdfardamentos" style="width: 100px;"></div>
             <div class="message">Pertinho de Você!</div>
             <div class="message">Agradecemos sua preferência!</div>
         </div>

@@ -307,6 +307,18 @@ exports.atualizarPedidoCompleto = async (id, pago, entrega, status, obs) => {
       // Tentar ler os valores como números, mesmo se estiverem em fórmulas
       const valorUnid = v[8] ? (typeof v[8] === 'string' ? parseFloat(v[8].replace(/[^\d.,]/g, '').replace(',', '.')) : parseFloat(v[8])) || 0 : 0;
       const quantidade = parseInt(v[5]) || 0;
+
+      const parseNumericValue = (value) => {
+        if (value === null || value === undefined || value === '') return 0;
+        if (typeof value === 'number') return value;
+        if (typeof value === 'string') {
+          // Remove caracteres especiais e converte para número
+          const cleanValue = value.toString().replace(/[^\d.,-]/g, '').replace(',', '.');
+          const num = parseFloat(cleanValue);
+          return isNaN(num) ? 0 : num;
+        }
+        return 0;
+      };
       
       return { 
         linha: i + 2, 
@@ -317,8 +329,8 @@ exports.atualizarPedidoCompleto = async (id, pago, entrega, status, obs) => {
         tamanho: v[4],
         quantidade: quantidade,
         estampa: v[6],
-        custoUnid: v[7],
-        valorUnid: valorUnid
+        custoUnid: parseNumericValue(v[7]),
+        valorUnid: parseNumericValue(valorUnid)
       };
     })
     .filter(v => String(v.id) === String(id));

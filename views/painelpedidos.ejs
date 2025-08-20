@@ -165,13 +165,23 @@
     // Funções helper para data de entrega
     function formatDataEntrega(dataString) {
       if (!dataString) return '';
-      
+
       try {
-        const data = new Date(dataString);
-        if (isNaN(data.getTime())) return dataString;
+        // 1. Divide a string em ano, mês e dia
+        const [ano, mes, dia] = dataString.split('-').map(Number);
         
+        // 2. Cria a data usando o construtor Y, M, D, que é local
+        //    IMPORTANTE: O mês em JavaScript é baseado em zero (0 = janeiro, 11 = dezembro)
+        const data = new Date(ano, mes - 1, dia);
+
+        if (isNaN(data.getTime())) {
+          // Caso a string não seja uma data válida, retorna a string original
+          return dataString;
+        }
+
         return data.toLocaleDateString('pt-BR');
       } catch (error) {
+        // Em caso de qualquer erro de parsing, retorna a string original
         return dataString;
       }
     }
